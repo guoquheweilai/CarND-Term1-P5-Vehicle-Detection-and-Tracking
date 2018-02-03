@@ -3,6 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from skimage.feature import hog
+from mpl_toolkits.mplot3d import Axes3D
 
 # Here is your draw_boxes function from the previous exercise
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
@@ -47,6 +48,22 @@ def find_matches(img, template_list):
         bbox_list.append((top_left, bottom_right))
         # Return the list of bounding boxes
     return bbox_list
+	
+# Define a function to return some characteristics of the dataset 
+def data_look(vehicle_list, non_vehicle_list):
+    data_dict = {}
+    # Define a key in data_dict "n_cars" and store the number of car images
+    data_dict["n_vehicles"] = len(vehicle_list)
+    # Define a key "n_notcars" and store the number of notcar images
+    data_dict["n_non_vehicles"] = len(non_vehicle_list)
+    # Read in a test image, either car or notcar
+    test_img = mpimg.imread(vehicle_list[0])
+    # Define a key "image_shape" and store the test image shape 3-tuple
+    data_dict["image_shape"] = test_img.shape
+    # Define a key "data_type" and store the data type of the test image.
+    data_dict["data_type"] = test_img.dtype
+    # Return data_dict
+    return data_dict
 
 # Define a function to compute color histogram features  
 # Pass the color_space flag as 3-letter all caps string
@@ -75,40 +92,9 @@ def color_hist(img, nbins=32, bins_range=(0, 256)):
     # Return the individual histograms, bin_centers and feature vector
     return hist_features, bin_centers, rhist, ghist, bhist
 
-	
-# Define a function to return some characteristics of the dataset 
-def data_look(vehicle_list, non_vehicle_list):
-    data_dict = {}
-    # Define a key in data_dict "n_cars" and store the number of car images
-    data_dict["n_vehicles"] = len(vehicle_list)
-    # Define a key "n_notcars" and store the number of notcar images
-    data_dict["n_non_vehicles"] = len(non_vehicle_list)
-    # Read in a test image, either car or notcar
-    test_img = mpimg.imread(vehicle_list[0])
-    # Define a key "image_shape" and store the test image shape 3-tuple
-    data_dict["image_shape"] = test_img.shape
-    # Define a key "data_type" and store the data type of the test image.
-    data_dict["data_type"] = test_img.dtype
-    # Return data_dict
-    return data_dict
-	
-# Define a function to return HOG features and visualization
-def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=True):
-    if vis == True:
-        # Use skimage.hog() to get both features and a visualization
-        features, hog_image = hog(img, orientations = orient, pixels_per_cell = (pix_per_cell, pix_per_cell), cells_per_block = (cell_per_block, cell_per_block), visualise = vis, feature_vector = feature_vec, block_norm="L2-Hys")
-        #features = [] # Remove this line
-        #hog_image = img # Remove this line
-        return features, hog_image
-    else:      
-        # Use skimage.hog() to get features only
-        features = hog(img, orientations = orient, pixels_per_cell = (pix_per_cell, pix_per_cell), cells_per_block = (cell_per_block, cell_per_block), visualise = vis, feature_vector = feature_vec, block_norm="L2-Hys")
-        #features = [] # Remove this line
-        return features
-
 # Define a function to extract features from a list of images
 # Have this function call bin_spatial() and color_hist()
-def extract_features_bin_spatial(imgs, cspace='RGB', spatial_size=(32, 32),
+def extract_features_bin_spatial_hist(imgs, cspace='RGB', spatial_size=(32, 32),
                         hist_bins=32, hist_range=(0, 256)):
 	# Create a list to append feature vectors to
 	features = []
@@ -125,11 +111,11 @@ def extract_features_bin_spatial(imgs, cspace='RGB', spatial_size=(32, 32),
 			elif 'LUV' == cspace:
 				features_image = cv2.cvtColor(image, cv2.COLOR_RGB2LUV)
 			elif 'HLS' == cspace:
-				feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+				features_image = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
 			elif 'YUV' == cspace:
-				feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
+				features_image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
 			elif 'YCrCb' == cspace:
-				feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
+				features_image = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
 		# Apply bin_spatial() to get spatial color features
 		spatial_feature = bin_spatial(features_image, size=spatial_size)
 		# Apply color_hist() to get color histogram features
@@ -140,6 +126,20 @@ def extract_features_bin_spatial(imgs, cspace='RGB', spatial_size=(32, 32),
 	# Return list of feature vectors
 	return features
 
+# Define a function to return HOG features and visualization
+def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=True):
+    if vis == True:
+        # Use skimage.hog() to get both features and a visualization
+        features, hog_image = hog(img, orientations = orient, pixels_per_cell = (pix_per_cell, pix_per_cell), cells_per_block = (cell_per_block, cell_per_block), visualise = vis, feature_vector = feature_vec, block_norm="L2-Hys")
+        #features = [] # Remove this line
+        #hog_image = img # Remove this line
+        return features, hog_image
+    else:      
+        # Use skimage.hog() to get features only
+        features = hog(img, orientations = orient, pixels_per_cell = (pix_per_cell, pix_per_cell), cells_per_block = (cell_per_block, cell_per_block), visualise = vis, feature_vector = feature_vec, block_norm="L2-Hys")
+        #features = [] # Remove this line
+        return features
+	
 # Define a function to extract features from a list of images
 def extract_features_hog_channel(imgs, cspace='RGB', orient=9, 
                         pix_per_cell=8, cell_per_block=2, hog_channel=0):
@@ -158,11 +158,11 @@ def extract_features_hog_channel(imgs, cspace='RGB', orient=9,
 			elif 'LUV' == cspace:
 				features_image = cv2.cvtColor(image, cv2.COLOR_RGB2LUV)
 			elif 'HLS' == cspace:
-				feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+				features_image = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
 			elif 'YUV' == cspace:
-				feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
+				features_image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
 			elif 'YCrCb' == cspace:
-				feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
+				features_image = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
 		# Call get_hog_features() with vis=False, feature_vec=True
 		if hog_channel == 'ALL':
 			hog_features = []
@@ -178,6 +178,57 @@ def extract_features_hog_channel(imgs, cspace='RGB', orient=9,
 		features.append(hog_features)
 		# Return list of feature vectors
 	return features
+
+# Define a function to extract features from a single image window
+# This function is very similar to extract_features()
+# just for a single image rather than list of images
+def extract_features_single_image(img, color_space='RGB', spatial_size=(32, 32),
+                        hist_bins=32, hist_range=(0, 256), orient=9, 
+                        pix_per_cell=8, cell_per_block=2, hog_channel=0,
+                        spatial_feat=True, hist_feat=True, hog_feat=True):    
+	#1) Define an empty list to receive features
+	img_features = []
+	#2) Apply color conversion if other than 'RGB'
+	if 'RGB' == color_space:
+		features_image = np.copy(img)
+	else:
+		if 'HSV' == color_space:
+			features_image = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+		elif 'LUV' == color_space:
+			features_image = cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
+		elif 'HLS' == color_space:
+			features_image = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
+		elif 'YUV' == color_space:
+			features_image = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
+		elif 'YCrCb' == color_space:
+			features_image = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)   
+	#3) Compute spatial features if flag is set
+	if spatial_feat == True:
+		spatial_features = bin_spatial(features_image, size=spatial_size)
+		#4) Append features to list
+		img_features.append(spatial_features)
+	#5) Compute histogram features if flag is set
+	if hist_feat == True:
+		# Remember to use [x] to read the specific return value
+		hist_features = color_hist(features_image, nbins=hist_bins, bins_range=hist_range)[0]
+		#6) Append features to list
+		img_features.append(hist_features)
+	#7) Compute HOG features if flag is set
+	if hog_feat == True:
+		if hog_channel == 'ALL':
+			hog_features = []
+			for channel in range(features_image.shape[2]):
+				hog_features.extend(get_hog_features(features_image[:,:,channel], 
+									orient, pix_per_cell, cell_per_block, 
+									vis=False, feature_vec=True))      
+		else:
+			hog_features = get_hog_features(features_image[:,:,hog_channel], orient, 
+						pix_per_cell, cell_per_block, vis=False, feature_vec=True)
+		#8) Append features to list
+		img_features.append(hog_features)
+		
+	#9) Return concatenated array of features
+	return np.concatenate(img_features)
 
 # Define a function that takes an image,
 # start and stop positions in both x and y, 
@@ -223,54 +274,7 @@ def slide_window(img, x_start_stop=(None, None), y_start_stop=(None, None),
     # Return the list of windows
     return window_list
 
-# Define a function to extract features from a single image window
-# This function is very similar to extract_features()
-# just for a single image rather than list of images
-def single_img_features(img, color_space='RGB', spatial_size=(32, 32),
-                        hist_bins=32, orient=9, 
-                        pix_per_cell=8, cell_per_block=2, hog_channel=0,
-                        spatial_feat=True, hist_feat=True, hog_feat=True):    
-    #1) Define an empty list to receive features
-    img_features = []
-    #2) Apply color conversion if other than 'RGB'
-    if color_space != 'RGB':
-        if color_space == 'HSV':
-            feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-        elif color_space == 'LUV':
-            feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
-        elif color_space == 'HLS':
-            feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
-        elif color_space == 'YUV':
-            feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
-        elif color_space == 'YCrCb':
-            feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
-    else: feature_image = np.copy(img)      
-    #3) Compute spatial features if flag is set
-    if spatial_feat == True:
-        spatial_features = bin_spatial(feature_image, size=spatial_size)
-        #4) Append features to list
-        img_features.append(spatial_features)
-    #5) Compute histogram features if flag is set
-    if hist_feat == True:
-        hist_features = color_hist(feature_image, nbins=hist_bins)
-        #6) Append features to list
-        img_features.append(hist_features)
-    #7) Compute HOG features if flag is set
-    if hog_feat == True:
-        if hog_channel == 'ALL':
-            hog_features = []
-            for channel in range(feature_image.shape[2]):
-                hog_features.extend(get_hog_features(feature_image[:,:,channel], 
-                                    orient, pix_per_cell, cell_per_block, 
-                                    vis=False, feature_vec=True))      
-        else:
-            hog_features = get_hog_features(feature_image[:,:,hog_channel], orient, 
-                        pix_per_cell, cell_per_block, vis=False, feature_vec=True)
-        #8) Append features to list
-        img_features.append(hog_features)
 
-    #9) Return concatenated array of features
-    return np.concatenate(img_features)
 
 # Define a function you will pass an image 
 # and the list of windows to be searched (output of slide_windows())
@@ -400,3 +404,30 @@ def draw_labeled_bboxes(img, labels):
         cv2.rectangle(img, bbox[0], bbox[1], (0,0,255), 6)
     # Return the image
     return img
+
+def plot3d(pixels, colors_rgb, axis_labels=list("RGB"), axis_limits=((0, 255), (0, 255), (0, 255))):
+    """Plot pixels in 3D."""
+
+    # Create figure and 3D axes
+    fig = plt.figure(figsize=(8, 8))
+    ax = Axes3D(fig)
+
+    # Set axis limits
+    ax.set_xlim(*axis_limits[0])
+    ax.set_ylim(*axis_limits[1])
+    ax.set_zlim(*axis_limits[2])
+
+    # Set axis labels and sizes
+    ax.tick_params(axis='both', which='major', labelsize=14, pad=8)
+    ax.set_xlabel(axis_labels[0], fontsize=16, labelpad=16)
+    ax.set_ylabel(axis_labels[1], fontsize=16, labelpad=16)
+    ax.set_zlabel(axis_labels[2], fontsize=16, labelpad=16)
+
+    # Plot pixel values with colors given in colors_rgb
+    ax.scatter(
+        pixels[:, :, 0].ravel(),
+        pixels[:, :, 1].ravel(),
+        pixels[:, :, 2].ravel(),
+        c=colors_rgb.reshape((-1, 3)), edgecolors='none')
+
+    return ax  # return Axes3D object for further manipulation
