@@ -206,13 +206,15 @@ def extract_features_single_image(img, color_space='RGB', spatial_size=(32, 32),
 	if spatial_feat == True:
 		spatial_features = bin_spatial(features_image, size=spatial_size)
 		#4) Append features to list
-		img_features.append(spatial_features)
+		img_features.append(spatial_features.shape)
+		#print('spatial_features size is ',spatial_features)
 	#5) Compute histogram features if flag is set
 	if hist_feat == True:
 		# Remember to use [x] to read the specific return value
 		hist_features = color_hist(features_image, nbins=hist_bins, bins_range=hist_range)[0]
 		#6) Append features to list
-		img_features.append(hist_features)
+		img_features.append(hist_features.shape)
+		#print('hist_features size is ',hist_features)
 	#7) Compute HOG features if flag is set
 	if hog_feat == True:
 		if hog_channel == 'ALL':
@@ -226,6 +228,7 @@ def extract_features_single_image(img, color_space='RGB', spatial_size=(32, 32),
 						pix_per_cell, cell_per_block, vis=False, feature_vec=True)
 		#8) Append features to list
 		img_features.append(hog_features)
+		#print('hog_features size is ',hog_features.shape)
 		
 	#9) Return concatenated array of features
 	return np.concatenate(img_features)
@@ -243,19 +246,19 @@ def slide_window(img, x_start_stop=(None, None), y_start_stop=(None, None),
         x_start_stop[1] = img.shape[1]
     if None == y_start_stop[0]:
         y_start_stop[0] = 0
-    if None == x_start_stop[1]:
+    if None == y_start_stop[1]:
         y_start_stop[1] = img.shape[0]
     # Compute the span of the region to be searched
     span_x = x_start_stop[1] - x_start_stop[0]
     span_y = y_start_stop[1] - y_start_stop[0]
     # Compute the number of pixels per step in x/y
-    pixels_per_step_x = xy_window[0]*(1-xy_overlap[0])
-    pixels_per_step_y = xy_window[1]*(1-xy_overlap[1])
+    pixels_per_step_x = np.int(xy_window[0]*(1-xy_overlap[0]))
+    pixels_per_step_y = np.int(xy_window[1]*(1-xy_overlap[1]))
     # Compute the number of windows in x/y
-    pixels_first_block_x = xy_window[0]*xy_overlap[0]
-    pixels_first_block_y = xy_window[1]*xy_overlap[1]
-    n_w_x = (span_x - pixels_first_block_x)/pixels_per_step_x
-    n_w_y = (span_y - pixels_first_block_y)/pixels_per_step_y
+    pixels_first_block_x = np.int(xy_window[0]*xy_overlap[0])
+    pixels_first_block_y = np.int(xy_window[1]*xy_overlap[1])
+    n_w_x = np.int((span_x - pixels_first_block_x)/pixels_per_step_x)
+    n_w_y = np.int((span_y - pixels_first_block_y)/pixels_per_step_y)
     # Initialize a list to append window positions to
     window_list = []
     # Loop through finding x and y window positions
@@ -267,14 +270,12 @@ def slide_window(img, x_start_stop=(None, None), y_start_stop=(None, None),
             # Calculate each window position
             coord_x_start = x_start_stop[0] + pixels_per_step_x * idx_w_x
             coord_x_end = xy_window[0] + coord_x_start
-            coord_y_start = y_start_stop[1] + pixels_per_step_y * idx_w_y
+            coord_y_start = y_start_stop[0] + pixels_per_step_y * idx_w_y
             coord_y_end = xy_window[1] + coord_y_start
             # Append window position to list
-            window_list.append(((coord_x_start, coord_x_end),(coord_y_start, coord_y_end)))
+            window_list.append(((coord_x_start, coord_y_start),(coord_x_end, coord_y_end)))
     # Return the list of windows
     return window_list
-
-
 
 # Define a function you will pass an image 
 # and the list of windows to be searched (output of slide_windows())
@@ -291,9 +292,9 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
     for window in windows:
         #3) Extract the test window from original image
         test_img = cv2.resize(img[window[0][1]:window[1][1], window[0][0]:window[1][0]], (64, 64))      
-        #4) Extract features for that window using single_img_features()
-        features = single_img_features(test_img, color_space=color_space, 
-                            spatial_size=spatial_size, hist_bins=hist_bins, 
+        #4) Extract features for that window using extract_features_single_image()
+        features = extract_features_single_image(test_img, color_space=color_space, 
+                            spatial_size=spatial_size, hist_bins=hist_bins, hist_range=hist_range,
                             orient=orient, pix_per_cell=pix_per_cell, 
                             cell_per_block=cell_per_block, 
                             hog_channel=hog_channel, spatial_feat=spatial_feat, 
