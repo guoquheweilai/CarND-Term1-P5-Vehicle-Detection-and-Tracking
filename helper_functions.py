@@ -331,7 +331,7 @@ def convert_color(img, color_space = 'HLS'):
     return features_image
 	
 # Define a single function that can extract features using hog sub-sampling and make predictions
-def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, hist_range, window_size, cell_per_step):
+def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, hog_channel, spatial_size, hist_bins, hist_range, window_size, cell_per_step):
 	# Initialize an empty list for matched window
 	list_windows = []
 	
@@ -361,21 +361,27 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
 	nysteps = (nyblocks - nblocks_per_window) // cells_per_step + 1
 
 	# Compute individual channel HOG features for the entire image
-	hog1 = get_hog_features(ch1, orient, pix_per_cell, cell_per_block, feature_vec=False)
-	hog2 = get_hog_features(ch2, orient, pix_per_cell, cell_per_block, feature_vec=False)
-	hog3 = get_hog_features(ch3, orient, pix_per_cell, cell_per_block, feature_vec=False)
+	if 'ALL' == hog_channel:
+		hog1 = get_hog_features(ch1, orient, pix_per_cell, cell_per_block, feature_vec=False)
+		hog2 = get_hog_features(ch2, orient, pix_per_cell, cell_per_block, feature_vec=False)
+		hog3 = get_hog_features(ch3, orient, pix_per_cell, cell_per_block, feature_vec=False)
+	else:
+		hog_ch_fea = get_hog_features(ctrans_tosearch[:,:,hog_channel], orient, pix_per_cell, cell_per_block, feature_vec=False)
 	
 	for xb in range(nxsteps):
 		for yb in range(nysteps):
 			ypos = yb*cells_per_step
 			xpos = xb*cells_per_step
 			# Extract HOG for this patch
-			hog_feat1 = hog1[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel() 
-			hog_feat2 = hog2[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel() 
-			hog_feat3 = hog3[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel() 
-			hog_features = np.hstack((hog_feat1, hog_feat2, hog_feat3))
+			if 'ALL' == hog_channel:
+				hog_feat1 = hog1[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel() 
+				hog_feat2 = hog2[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel() 
+				hog_feat3 = hog3[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel() 
+				hog_features = np.hstack((hog_feat1, hog_feat2, hog_feat3))
+			else:
+				hog_features = hog_ch_fea[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel() 
 
-			# print(hog_features.shape)
+			#print(hog_features.shape)
 
 			xleft = xpos*pix_per_cell
 			ytop = ypos*pix_per_cell
@@ -472,6 +478,7 @@ def process_image(img):
 	orient = dict_pickle["orient"]
 	pix_per_cell = dict_pickle["pix_per_cell"]
 	cell_per_block = dict_pickle["cell_per_block"]
+	hog_channel = dict_pickle["hog_channel"]
 	spatial_size = dict_pickle["spatial_size"]
 	hist_bins = dict_pickle["hist_bins"]
 	hist_range = dict_pickle["hist_range"]
@@ -484,13 +491,13 @@ def process_image(img):
 	cell_per_step = 4
 	pix_per_cell = 12
 	# Run function
-	out_img_1, list_windows_1 = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, hist_range, window_size, cell_per_step)
+	out_img_1, list_windows_1 = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, hog_channel, spatial_size, hist_bins, hist_range, window_size, cell_per_step)
 	
 	# Scan for window scale (64, 64) and cells per step 4
 	window_size = 64
 	cell_per_step = 4
 	pix_per_cell = 8
 	# Run function
-	out_img_2, list_windows_2 = find_cars(out_img_1, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, hist_range, window_size, cell_per_step)
+	out_img_2, list_windows_2 = find_cars(out_img_1, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, hog_channel, spatial_size, hist_bins, hist_range, window_size, cell_per_step)
 
-	return out_img
+	return out_img_2
