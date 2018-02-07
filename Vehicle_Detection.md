@@ -157,4 +157,29 @@ Here's an example result showing the heatmap from the test images, the result of
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further. 
+Here are my steps to approach to the final pipeline.
++ Created my pipeline architecture with a small amout of test data
+  - Extract the specific features from the dataset
+  - Normalie the extracted features vector
+  - Define labels vector
+  - Split up and randomize on both extracted features vector and labels vector
+      * Return training dataset and test dataset
+  - Create SVM
+  - Fit the training dataset into SVM
+  - Evaluate the accuracy of SVM
+  - Predict the result with the test dataset
+
++ Tried different combination of color spaces and HOG features.
++ Tried different heatmap threshold to filter out the false positive
+
+
+Here are my problems/issues
+1. Length of feature vector doesn't match the scaler
+  - Fixed by controling the dimension of the feature vector
+2. Too many or too less matched windows
+  - Improved by using moderate window size and overlap
+  - Improved by tunning the color spaces
+  - Improved by tunning the HOG feature parameters
+3. Drawing window in the shawdow of the tree.
+  - Record the previous position and predict the next window appearance.
+  - Calculate the width of window, discard the window if it is too wide.
