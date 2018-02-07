@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from skimage.feature import hog
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.ndimage.measurements import label
 
 # Here is your draw_boxes function from the previous exercise
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
@@ -500,4 +501,20 @@ def process_image(img):
 	# Run function
 	out_img_2, list_windows_2 = find_cars(out_img_1, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, hog_channel, spatial_size, hist_bins, hist_range, window_size, cell_per_step)
 
-	return out_img_2
+	# Create heatmap
+	heat = np.zeros_like(out_img_2[:,:,0]).astype(np.float)
+
+	# Add heat to each box in box list
+	heat = add_heat(heat,list_windows_2)
+
+	# Apply threshold to help remove false positives
+	heat = apply_threshold(heat,2)
+
+	# Visualize the heatmap when displaying    
+	heatmap = np.clip(heat, 0, 255)
+
+	# Find final boxes from heatmap using label function
+	labels = label(heatmap)
+	draw_img = draw_labeled_bboxes(np.copy(img), labels)
+	
+	return draw_img
