@@ -23,8 +23,9 @@ I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an 
 Then I randomly picked an image from each classes and experienced with them.
 I explored HOG feature extraction on the same image with different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).
 
+
 | Parameters name  | First set | Second set | Third set |
-| ------------- | ------------- | ------------- |
+| ------------- | ------------- | ------------- | ------------- |
 | Orientation  | 9  | 9 | 9 |
 | Pixels per cell  | 8  | 4 | 16 |
 | Cells per block  | 2  | 2 | 2 |
@@ -37,8 +38,9 @@ Here is an image showing the comparison in HOG feature extraction.
 
 Then I tried spatial binning and color histogram in different color spaces
 
+
 | Parameters name  | First set | Second set | Third set | Fourth set |
-| ------------- | ------------- | ------------- | ------------- |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
 | Color spaces  | 'RGb'  | 'RGB' | 'HLS' | 'YCrCb' |
 | Spatial size  | (32, 32)  | (32, 32) | (32, 32) | (32, 32) |
 | Histogram bins  | 32  | 32 | 32 | 32 |
