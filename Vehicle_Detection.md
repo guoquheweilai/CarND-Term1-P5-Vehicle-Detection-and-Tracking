@@ -142,162 +142,16 @@ Here's a [link to my video result](./test_videos_output/project_video_output.mp4
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
+I recorded the multiple scales position of positive detection in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
 
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
-
-__Import librarires__
+Here's an example result showing the heatmap from the test images, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
 
 
-```python
-from scipy.ndimage.measurements import label
-```
-
-__Import functions__
-
-
-```python
-from helper_functions import add_heat, apply_threshold, draw_labeled_bboxes
-```
-
-
-```python
-# def add_heat(heatmap, bbox_list):
-#     # Iterate through list of bboxes
-#     for box in bbox_list:
-#         # Add += 1 for all pixels inside each bbox
-#         # Assuming each "box" takes the form ((x1, y1), (x2, y2))
-#         heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
-
-#     # Return updated heatmap
-#     return heatmap# Iterate through list of bboxes
-```
-
-
-```python
-# def apply_threshold(heatmap, threshold):
-#     # Zero out pixels below the threshold
-#     heatmap[heatmap <= threshold] = 0
-#     # Return thresholded map
-#     return heatmap
-```
-
-
-```python
-# def draw_labeled_bboxes(img, labels):
-#     # Iterate through all detected cars
-#     for car_number in range(1, labels[1]+1):
-#         # Find pixels with each car_number label value
-#         nonzero = (labels[0] == car_number).nonzero()
-#         # Identify x and y values of those pixels
-#         nonzeroy = np.array(nonzero[0])
-#         nonzerox = np.array(nonzero[1])
-#         # Define a bounding box based on min/max x and y
-#         bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
-#         # Draw the box on the image
-#         cv2.rectangle(img, bbox[0], bbox[1], (0,0,255), 6)
-#     # Return the image
-#     return img
-```
-
-__Run functions__
-
-
-```python
-# list_out_img
-# list_windows
-```
-
-
-```python
-# Initialize an empty list
-list_draw_img = []
-list_heatmap = []
-
-for idx in range(len(test_images_all)):
-    # Read image
-    image = mpimg.imread(test_images_all[idx])
-    heat = np.zeros_like(image[:,:,0]).astype(np.float)
-
-    # Add heat to each box in box list
-    heat = add_heat(heat,list_windows[idx])
-
-    # Apply threshold to help remove false positives
-    heat = apply_threshold(heat,2)
-
-    # Visualize the heatmap when displaying    
-    heatmap = np.clip(heat, 0, 255)
-
-    # Find final boxes from heatmap using label function
-    labels = label(heatmap)
-    draw_img = draw_labeled_bboxes(np.copy(image), labels)
-    
-    # Append the output image to the list 
-    list_draw_img.append(draw_img)
-    
-    # Append the output heatmap to the list 
-    list_heatmap.append(heatmap)
-```
-
-__Plot images__
-
-
-```python
-# Plot the draw images
-f, axs = plt.subplots(6, 3, figsize=(36, 24))
-axs = axs.ravel()
-
-for idx in range(len(list_draw_img)):
-    # Plot image
-    axs[idx*3].imshow(list_out_img[idx])
-    # Set title name
-    # title_name = test_images_all[idx].split('\\')[-1]
-    title_name = 'Car Positions'
-    axs[idx*3].set_title(title_name, fontsize = 20)
-    
-    # Plot image
-    axs[idx*3+1].imshow(list_draw_img[idx])
-    # Set title name
-    # title_name = test_images_all[idx].split('\\')[-1]
-    title_name = 'Car Positions'
-    axs[idx*3+1].set_title(title_name, fontsize = 20)
-
-    # Plot image
-    axs[idx*3+2].imshow(list_heatmap[idx], cmap='hot')
-    # Set title name
-    # title_name = test_images_all[idx].split('\\')[-1]
-    title_name = 'Heatmap'
-    axs[idx*3+2].set_title(title_name, fontsize = 20)
-
-f.tight_layout()
-plt.subplots_adjust(left=0.1, right=0.85, top=0.85, bottom=0.3)
-```
-
-
-![png](output_111_0.png)
-
-
-
-```python
-# fig = plt.figure()
-# plt.subplot(121)
-# plt.imshow(draw_img)
-# plt.title('Car Positions')
-# plt.subplot(122)
-# plt.imshow(heatmap, cmap='hot')
-# plt.title('Heat Map')
-# fig.tight_layout()
-```
-
-### Here are six frames and their corresponding heatmaps:
+### Here are six test images and their corresponding heatmaps:
 
 ![alt text][image5]
 
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
 
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
 
 ### Discussion
 
