@@ -137,71 +137,7 @@ Ultimately I searched on multiple scale using HLS 3-channel HOG features plus sp
 ### Video Implementation
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
-
-__Import Libraries__
-
-
-```python
-# Import everything needed to edit/save/watch video clips
-from moviepy.editor import VideoFileClip
-from IPython.display import HTML
-
-#import numpy as np
-from helper_functions import process_image
-```
-
-__Process Video__  
-Test on the given video project_video.mp4
-
-
-```python
-video_output = 'test_videos_output/project_video_output.mp4'
-## To speed up the testing process you may want to try your pipeline on a shorter subclip of the video
-## To do so add .subclip(start_second,end_second) to the end of the line below
-## Where start_second and end_second are integer values representing the start and end of the subclip
-## You may also uncomment the following line for a subclip of the first 5 seconds
-##clip1 = VideoFileClip("test_videos/solidWhiteRight.mp4").subclip(0,5)
-# clip1 = VideoFileClip("project_video.mp4").subclip(0,3)
-clip1 = VideoFileClip("project_video.mp4")
-video_output_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
-%time video_output_clip.write_videofile(video_output, audio=False)
-```
-
-    [MoviePy] >>>> Building video test_videos_output/project_video_output.mp4
-    [MoviePy] Writing video test_videos_output/project_video_output.mp4
-    
-
-    100%|█████████▉| 1260/1261 [14:52<00:00,  1.42it/s]
-    
-
-    [MoviePy] Done.
-    [MoviePy] >>>> Video ready: test_videos_output/project_video_output.mp4 
-    
-    CPU times: user 16min 48s, sys: 5.54 s, total: 16min 54s
-    Wall time: 14min 53s
-    
-
-__Play Video Inline__
-
-
-```python
-HTML("""
-<video width="960" height="540" controls>
-  <source src="{0}">
-</video>
-""".format(video_output))
-```
-
-
-
-
-
-<video width="960" height="540" controls>
-  <source src="test_videos_output/project_video_output.mp4">
-</video>
-
-
+Here's a [link to my video result](./test_videos_output/project_video.mp4)
 
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
