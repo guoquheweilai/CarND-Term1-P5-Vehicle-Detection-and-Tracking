@@ -109,161 +109,24 @@ Here are the training steps:
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided to set search window scale at `(64, 64)` and overlap at `(0.5, 0.5)` based on the experiment below. The code below is used to evaluate the performance of different combination of window scale and overlap value.  
+I decided to search window at different scale at `(64, 64)` `(96, 96)` and overlap at `(0.5, 0.5)` based on the experiment below. The code below is used to evaluate the performance of different combination of window scale and overlap value.  
 From the final result, I come up the following conclusions:
 * Larger overlap will result in more match windows
 * Less overlap will result in less match window, nevertheless, not good for the following steps "add heat" and "filter".
 * Smaller window will give you more match windows to analyze
 * Bigger window will result less overlap, not good for the following steps "add heat" and "filter".
 
-__Import functions__
+I explored sliding window search on the same image with different parameteres.
 
 
-```python
-from helper_functions import slide_window, search_windows, draw_boxes
-```
-
-__Read in test image__
-
-
-```python
-image = mpimg.imread('./test_images/test1.jpg')
-draw_image = np.copy(image)
-
-# Uncomment the following line if you extracted training
-# data from .png images (scaled 0 to 1 by mpimg) and the
-# image you are searching is a .jpg (scaled 0 to 255)
-image = image.astype(np.float32)/255
-```
-
-__Define Parameters__
+| Parameters name  | First set | Second set | Third set | Fourth |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| Window size  | (64, 64)  | (64, 64) | (64, 64) | (32, 32) | (96, 96) |
+| Window overlap  | (0.5, 0.5)  | (0.2, 0.2) | (0.8, 0.8) | (0.5, 0.5) | (0.5, 0.5) |
 
 
-```python
-y_max = image.shape[0]
-y_start_stop = [np.int(y_max/2), y_max] # Min and max in y to search in slide_window()
+Here is an image showing the comparison in different window size and overlap.
 
-# First set
-xy_window_1 = (64, 64)
-xy_overlap_1 = (0.5, 0.5)
-
-# Second set
-xy_window_2 = (64, 64)
-xy_overlap_2 = (0.2, 0.2)
-
-# Third set
-xy_window_3 = (64, 64)
-xy_overlap_3 = (0.8, 0.8)
-
-# Fourth set
-xy_window_4 = (32, 32)
-xy_overlap_4 = (0.5, 0.5)
-
-# Fifth set
-xy_window_5 = (96, 96)
-xy_overlap_5 = (0.5, 0.5)
-```
-
-__Search windows__
-
-
-```python
-# First set
-windows_1 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop, 
-                    xy_window=xy_window_1, xy_overlap=xy_overlap_1)
-
-hot_windows_1 = search_windows(image, windows_1, svc, X_scaler_final, color_space=color_space_final, 
-                        spatial_size=spatial_size_final, hist_bins=hist_bins_final, hist_range = hist_range_final, 
-                        orient=orient_final, pix_per_cell=pix_per_cell_final, 
-                        cell_per_block=cell_per_block_final, 
-                        hog_channel=multichannel_final, spatial_feat=spatial_feat, 
-                        hist_feat=hist_feat, hog_feat=hog_feat)                       
-
-window_img_1 = draw_boxes(draw_image, hot_windows_1, color=(0, 0, 255), thick=6)
-
-# Second set
-windows_2 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop, 
-                    xy_window=xy_window_2, xy_overlap=xy_overlap_2)
-
-hot_windows_2 = search_windows(image, windows_2, svc, X_scaler_final, color_space=color_space_final, 
-                        spatial_size=spatial_size_final, hist_bins=hist_bins_final, hist_range = hist_range_final, 
-                        orient=orient_final, pix_per_cell=pix_per_cell_final, 
-                        cell_per_block=cell_per_block_final, 
-                        hog_channel=multichannel_final, spatial_feat=spatial_feat, 
-                        hist_feat=hist_feat, hog_feat=hog_feat)                       
-
-window_img_2 = draw_boxes(draw_image, hot_windows_2, color=(0, 0, 255), thick=6)
-
-# Third set
-windows_3 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop, 
-                    xy_window=xy_window_3, xy_overlap=xy_overlap_3)
-
-hot_windows_3 = search_windows(image, windows_3, svc, X_scaler_final, color_space=color_space_final, 
-                        spatial_size=spatial_size_final, hist_bins=hist_bins_final, hist_range = hist_range_final, 
-                        orient=orient_final, pix_per_cell=pix_per_cell_final, 
-                        cell_per_block=cell_per_block_final, 
-                        hog_channel=multichannel_final, spatial_feat=spatial_feat, 
-                        hist_feat=hist_feat, hog_feat=hog_feat)                       
-
-window_img_3 = draw_boxes(draw_image, hot_windows_3, color=(0, 0, 255), thick=6)
-
-# Fourth set
-windows_4 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop, 
-                    xy_window=xy_window_4, xy_overlap=xy_overlap_4)
-
-hot_windows_4 = search_windows(image, windows_4, svc, X_scaler_final, color_space=color_space_final, 
-                        spatial_size=spatial_size_final, hist_bins=hist_bins_final, hist_range = hist_range_final, 
-                        orient=orient_final, pix_per_cell=pix_per_cell_final, 
-                        cell_per_block=cell_per_block_final, 
-                        hog_channel=multichannel_final, spatial_feat=spatial_feat, 
-                        hist_feat=hist_feat, hog_feat=hog_feat)                       
-
-window_img_4 = draw_boxes(draw_image, hot_windows_4, color=(0, 0, 255), thick=6)
-
-# Fifth set
-windows_5 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop, 
-                    xy_window=xy_window_5, xy_overlap=xy_overlap_5)
-
-hot_windows_5 = search_windows(image, windows_5, svc, X_scaler_final, color_space=color_space_final, 
-                        spatial_size=spatial_size_final, hist_bins=hist_bins_final, hist_range = hist_range_final, 
-                        orient=orient_final, pix_per_cell=pix_per_cell_final, 
-                        cell_per_block=cell_per_block_final, 
-                        hog_channel=multichannel_final, spatial_feat=spatial_feat, 
-                        hist_feat=hist_feat, hog_feat=hog_feat)                       
-
-window_img_5 = draw_boxes(draw_image, hot_windows_5, color=(0, 0, 255), thick=6)
-
-```
-
-__Plot images__
-
-
-```python
-# Plot the examples
-f, axs = plt.subplots(2, 3, figsize=(36, 24))
-axs = axs.ravel()
-
-axs[0].imshow(window_img_1)
-axs[0].set_title('xy_window=(64,64) xy_overlap=(0.5,0.5)', fontsize = 20)
-
-axs[1].imshow(window_img_2)
-axs[1].set_title('xy_window=(64,64) xy_overlap=(0.2,0.2)', fontsize = 20)
-
-axs[2].imshow(window_img_3)
-axs[2].set_title('xy_window=(64,64) xy_overlap=(0.8,0.8)', fontsize = 20)
-
-axs[3].imshow(window_img_1)
-axs[3].set_title('xy_window=(64,64) xy_overlap=(0.5,0.5)', fontsize = 20)
-
-axs[4].imshow(window_img_4)
-axs[4].set_title('xy_window=(32,32) xy_overlap=(0.5,0.5)', fontsize = 20)
-
-axs[5].imshow(window_img_5)
-axs[5].set_title('xy_window=(96,96) xy_overlap=(0.5,0.5)', fontsize = 20)
-
-f.tight_layout()
-plt.subplots_adjust(left=0.1, right=0.85, top=0.85, bottom=0.3)
-```
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
