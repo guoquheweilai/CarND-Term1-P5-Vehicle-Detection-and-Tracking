@@ -5,15 +5,17 @@ In this project, your goal is to write a software pipeline to detect vehicles in
 
 ## As a suggestion, the README.md file for each repository can include the following information:
 ### a list of files contained in the repository with a brief description of each file
-1. examples (A directory containing example images)
+1. classifiers (A directory containing different classifiers)
 2. test_images (A directory containing test images)
 3. output_images (A directory containing generated images)
 4. test_videos_output (A directory containing generated video)
-5. Advanced_Lane_Lines.html (Generated HTML format for review)
-6. Advanced_Lane_Lines.ipynb (Source code for visualization)
+5. Vehicle_Detection.html (Generated HTML format for review)
+6. Vehicle_Detection.ipynb (Source code for visualization)
 7. helper_functions.py (Source code)
 8. README.md (Readme file)
 9. writeup.md (Writeup file)
+10. dict_vehicle_detection.p (Data file for saving trained classifier and corresponding parameters)
+11. LICENSE (License)
  
 ### any instructions someone might need for running your code
 1. Configure your conda environment with Udacity [CarND-Term1-Starter-Kit](https://github.com/udacity/CarND-Term1-Starter-Kit)
