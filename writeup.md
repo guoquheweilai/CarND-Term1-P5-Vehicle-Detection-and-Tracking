@@ -14,7 +14,7 @@ The goals / steps of this project are the following:
 
 #### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in lines 131 through 143 of the file called (`helper_functions.py`)[https://github.com/ikcGitHub/CarND-Vehicle-Detection/blob/master/helper_functions.py]).  
+The code for this step is contained in lines 131 through 143 of the file called [`helper_functions.py`](https://github.com/ikcGitHub/CarND-Vehicle-Detection/blob/master/helper_functions.py).  
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
@@ -119,7 +119,7 @@ From the final result, I come up the following conclusions:
 I explored sliding window search on the same image with different parameteres.
 
 
-| Parameters name  | First set | Second set | Third set | Fourth |
+| Parameters name  | First set | Second set | Third set | Fourth set | Fifth set |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Window size  | (64, 64)  | (64, 64) | (64, 64) | (32, 32) | (96, 96) |
 | Window overlap  | (0.5, 0.5)  | (0.2, 0.2) | (0.8, 0.8) | (0.5, 0.5) | (0.5, 0.5) |
@@ -130,7 +130,7 @@ Here is an image showing the comparison in different window size and overlap.
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on multiple scale using HLS 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result. Those features extraction, classifying and window drawing were implemented in the function `find_cars()`. To enhance the efficiency of classifying, there are few code in `find_cars()` to extract HOG features just once for the entire region of interest in each full image / video frame. Please refer to the below images for your reference.
+Ultimately I searched on multiple scales using HLS 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result. Those features extraction, classifying and window drawing were implemented in the function `find_cars()`. To enhance the efficiency of classifying, there are few code in `find_cars()` to extract HOG features just once for the entire region of interest in each full image / video frame. Please refer to the below images for your reference.
 
 
 
