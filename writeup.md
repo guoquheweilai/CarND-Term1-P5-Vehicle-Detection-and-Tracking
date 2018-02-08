@@ -18,7 +18,7 @@ The code for this step is contained in lines 131 through 143 of the file called 
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
-![alt text][image1]
+![png](./output_images/output_11_1.png)
 
 Then I randomly picked an image from each classes and experienced with them.
 I explored HOG feature extraction on the same image with different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).
@@ -35,6 +35,7 @@ I explored HOG feature extraction on the same image with different `skimage.hog(
 
 Here is an image showing the comparison in HOG feature extraction.
 
+![png](./output_images/output_22_0.png)
 
 Then I tried spatial binning and color histogram in different color spaces
 
@@ -49,8 +50,7 @@ Then I tried spatial binning and color histogram in different color spaces
 
 Here is an image showing the comparison in color spaces feature extraction.
 
-
-![alt text][image2]
+![png](./output_images/output_35_0.png)
 
 
 #### 2. Explain how you settled on your final choice of HOG parameters.
@@ -127,12 +127,13 @@ I explored sliding window search on the same image with different parameteres.
 
 Here is an image showing the comparison in different window size and overlap.
 
+![png](./output_images/output_73_0.png)
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
 Ultimately I searched on multiple scales using HLS 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result. Those features extraction, classifying and window drawing were implemented in the function `find_cars()`. To enhance the efficiency of classifying, there are few code in `find_cars()` to extract HOG features just once for the entire region of interest in each full image / video frame. Please refer to the below images for your reference.
 
-
+![png](./output_images/output_90_0.png)
 
 ### Video Implementation
 
@@ -149,7 +150,7 @@ Here's an example result showing the heatmap from the test images, the result of
 
 ### Here are six test images and their corresponding heatmaps:
 
-![alt text][image5]
+![png](./output_images/output_106_0.png)
 
 
 
