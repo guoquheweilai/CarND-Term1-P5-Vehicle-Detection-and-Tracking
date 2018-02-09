@@ -6,6 +6,10 @@ import matplotlib.image as mpimg
 from skimage.feature import hog
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.ndimage.measurements import label
+from collections import deque
+
+n_frames = 6
+heatmaps = deque(maxlen = n_frames)
 
 # Here is your draw_boxes function from the previous exercise
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
@@ -190,6 +194,7 @@ def extract_features_single_image(img, color_space='RGB', spatial_size=(32, 32),
                         spatial_feat=True, hist_feat=True, hog_feat=True):    
 	#1) Define an empty list to receive features
 	img_features = []
+	#print("img is ", img)
 	#2) Apply color conversion if other than 'RGB'
 	if 'RGB' == color_space:
 		features_image = np.copy(img)
@@ -204,12 +209,14 @@ def extract_features_single_image(img, color_space='RGB', spatial_size=(32, 32),
 			features_image = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
 		elif 'YCrCb' == color_space:
 			features_image = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)   
+	#print('features_image is', features_image)
 	#3) Compute spatial features if flag is set
 	if spatial_feat == True:
 		spatial_features = bin_spatial(features_image, size=spatial_size)
 		#4) Append features to list
 		# img_features.append(spatial_features.shape)
 		#print('spatial_features size is ',len(spatial_features))
+		#print("spatial_features is ", spatial_features)
 	#5) Compute histogram features if flag is set
 	if hist_feat == True:
 		# Remember to use [x] to read the specific return value
@@ -217,6 +224,7 @@ def extract_features_single_image(img, color_space='RGB', spatial_size=(32, 32),
 		#6) Append features to list
 		# img_features.append(hist_features.shape)
 		#print('hist_features size is ',len(hist_features))
+		#print("hist_features is ", hist_features)
 	#7) Compute HOG features if flag is set
 	if hog_feat == True:
 		if hog_channel == 'ALL':
@@ -231,7 +239,7 @@ def extract_features_single_image(img, color_space='RGB', spatial_size=(32, 32),
 		#8) Append features to list
 		# img_features.append(hog_features)
 		#print('hog_features size is ',len(hog_features))
-		
+		#print("hog_features is ", hog_features)
 	#9) Return concatenated array of features
 	img_features = np.hstack((spatial_features, hist_features, hog_features))
 	return img_features
@@ -337,10 +345,11 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
 	list_windows = []
 	
 	draw_img = np.copy(img)
-	img = img.astype(np.float32)/255
+	#img = img.astype(np.float32)/255
+	img = img.astype(np.float32)
 
 	img_tosearch = img[ystart:ystop,:,:]
-	ctrans_tosearch = convert_color(img_tosearch, color_space='HLS')
+	ctrans_tosearch = convert_color(img_tosearch, color_space='YCrCb')
 	if scale != 1:
 		imshape = ctrans_tosearch.shape
 		ctrans_tosearch = cv2.resize(ctrans_tosearch, (np.int(imshape[1]/scale), np.int(imshape[0]/scale)))
@@ -399,9 +408,16 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
 
 			# Scale features and make a prediction
 			test_features = X_scaler.transform(np.hstack((spatial_features, hist_features, hog_features)).reshape(1, -1))    
-			#test_features = X_scaler.transform(np.hstack((shape_feat, hist_feat)).reshape(1, -1))    
-			test_prediction = svc.predict(test_features)
-            
+			
+			confidence_score = svc.decision_function(test_features)
+			#print(confidence_score)
+			
+			if confidence_score >= 4:			
+				#test_features = X_scaler.transform(np.hstack((shape_feat, hist_feat)).reshape(1, -1))    
+				test_prediction = svc.predict(test_features)
+			else:
+				test_prediction = 0
+				
 			if test_prediction == 1:
 				xbox_left = np.int(xleft*scale)
 				ytop_draw = np.int(ytop*scale)
@@ -470,8 +486,15 @@ def plot3d(pixels, colors_rgb, axis_labels=list("RGB"), axis_limits=((0, 255), (
     return ax  # return Axes3D object for further manipulation
 	
 def process_image(img):
+	# Since image will be save in png format, scale up to 255
+	draw_img = np.copy(img)
+	img = img.astype(np.float32) * 255
+
 	# Load dictionary
-	dict_pickle = pickle.load(open('dict_vehicle_detection.p', 'rb'))
+	path_classifier = './dict_vehicle_detection.p'
+	#path_classifier = './classifiers/YCrCb_ALL_HOG_9_8_2.p'
+	dict_pickle = pickle.load(open(path_classifier, 'rb'))
+	# dict_pickle = pickle.load(open('dict_vehicle_detection.p', 'rb'))
 
 	# Read data
 	svc = dict_pickle["svc"]
@@ -488,33 +511,53 @@ def process_image(img):
 	scale = dict_pickle["scale"]
 	
 	# Scan for window scale (96, 96) and cells per step 8
-	window_size = 96
-	cell_per_step = 4
-	pix_per_cell = 12
+	window_size = 64
+	cell_per_step = 6
+	pix_per_cell = 8
+	ystart = 420
+	ystop = 580
+	scale = 1.5
 	# Run function
 	out_img_1, list_windows_1 = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, hog_channel, spatial_size, hist_bins, hist_range, window_size, cell_per_step)
 	
 	# Scan for window scale (64, 64) and cells per step 4
 	window_size = 64
-	cell_per_step = 4
+	cell_per_step = 6
 	pix_per_cell = 8
+	ystart = 400
+	ystop = 540
+	scale = 0.8
 	# Run function
 	out_img_2, list_windows_2 = find_cars(out_img_1, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, hog_channel, spatial_size, hist_bins, hist_range, window_size, cell_per_step)
-
+	
 	# Create heatmap
 	heat = np.zeros_like(out_img_2[:,:,0]).astype(np.float)
 
+	# Combine windows list
+	if 0 == len(list_windows_1):
+		hstack = list_windows_2
+	elif 0 == len(list_windows_2):
+		hstack = list_windows_1
+	else:
+		hstack = np.vstack((list_windows_1, list_windows_2))
 	# Add heat to each box in box list
-	heat = add_heat(heat,list_windows_2)
+	heat = add_heat(heat,hstack)
 
+	# Add new heat map to the list
+	heatmaps.append(heat)
+	
+	# Define threshold value
+	threshold_filter = 6
+	
 	# Apply threshold to help remove false positives
-	heat = apply_threshold(heat,2)
+	combined = sum(heatmaps)
+	heat = apply_threshold(combined, threshold_filter)
 
 	# Visualize the heatmap when displaying    
 	heatmap = np.clip(heat, 0, 255)
 
 	# Find final boxes from heatmap using label function
 	labels = label(heatmap)
-	draw_img = draw_labeled_bboxes(np.copy(img), labels)
+	draw_img = draw_labeled_bboxes(np.copy(draw_img), labels)
 	
 	return draw_img
