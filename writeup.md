@@ -120,7 +120,7 @@ I explored sliding window search on the same image with different parameteres.
 
 
 | Parameters name  | First set | Second set | Third set | Fourth set | Fifth set |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Window size  | (64, 64)  | (64, 64) | (64, 64) | (32, 32) | (96, 96) |
 | Window overlap  | (0.5, 0.5)  | (0.2, 0.2) | (0.8, 0.8) | (0.5, 0.5) | (0.5, 0.5) |
 
@@ -184,3 +184,10 @@ Here are my problems/issues
 3. Drawing window in the shawdow of the tree.
   - Record the previous position and predict the next window appearance.
   - Calculate the width of window, discard the window if it is too wide.
+  
+Updates on 02/09:
+1. Use color space `YCrCb`
+2. Use scale instead of window size in `find_car()`
+3. Control the window by setting `y_start` and `y_stop`
+4. Apply `if svc.decision_function(X) > threshold:`
+5. Fixed scale problem while using `matplotlib.image` on importing jpg or png format
