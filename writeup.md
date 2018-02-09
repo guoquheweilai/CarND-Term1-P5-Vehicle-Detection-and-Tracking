@@ -78,7 +78,7 @@ multichannel_final = 'ALL'
 
 I trained a linear SVM using the following features:
 + __Color features(spatial binning, color histogram)__  
-color_space_final = 'HLS'  
+color_space_final = 'YCrCb'  
 spatial_size_final = (32, 32)  
 hist_bins_final = 32  
 hist_range_final = (0, 256)  
@@ -90,7 +90,7 @@ pix_per_cell_final = 8
 cell_per_block_final = 2  
 vis_final = False  
 feature_vec_final = True  
-multichannel_final = 'ALL'  
+multichannel_final = 1  
 ___
 Here are the training steps:
 + Extract the specific features from the dataset
@@ -127,13 +127,20 @@ I explored sliding window search on the same image with different parameteres.
 
 Here is an image showing the comparison in different window size and overlap.
 
-![png](./output_images/output_73_0.png)
+![png](./output_images/output_74_0.png)
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
 Ultimately I searched on multiple scales using HLS 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result. Those features extraction, classifying and window drawing were implemented in the function `find_cars()`. To enhance the efficiency of classifying, there are few code in `find_cars()` to extract HOG features just once for the entire region of interest in each full image / video frame. Please refer to the below images for your reference.
 
-![png](./output_images/output_90_0.png)
+Updates on 02/09:
+1. Use color space `YCrCb`
+2. Use scale instead of window size in `find_car()`
+3. Control the window by setting `y_start` and `y_stop`
+4. Apply `if svc.decision_function(X) > threshold:`
+5. Fixed scale problem while using `matplotlib.image` on importing jpg or png format  
+
+![png](./output_images/output_93_0.png)
 
 ### Video Implementation
 
@@ -145,14 +152,17 @@ Here's a [link to my video result](./test_videos_output/project_video_output.mp4
 
 I recorded the multiple scales position of positive detection in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
 
-Here's an example result showing the heatmap from the test images, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
+Here's an example result showing the heatmap on those time-series images, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
 
 
-### Here are six test images and their corresponding heatmaps:
+### Here are six series frames from video and their corresponding heatmaps:
+You can tell my heatmap is accumulating the heat from previous heatmap.  
 
-![png](./output_images/output_106_0.png)
+![png](./output_images/output_115_0.png)
 
+### Here are the drawn image from above six series images
 
+![png](./output_images/output_120_0.png)
 
 ### Discussion
 
