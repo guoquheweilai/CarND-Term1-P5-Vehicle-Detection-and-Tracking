@@ -1,5 +1,4 @@
 examples/*
-test_images/*
 output_images/.DS_Store
 output_images/save_output_here.txt
 project_video.mp4
@@ -9,3 +8,5 @@ writeup_template.md
 training_dataset/*
 __pycache__/helper_functions.cpython-35.pyc
 .ipynb_checkpoints/Vehicle_Detection-checkpoint.ipynb
+Vehicle_Detection.md
+Vehicle_Detection.zip
