@@ -58,9 +58,9 @@ def extract_hog_features(imgs, cspace='RGB', orient=9,
     # Create a list to append feature vectors to
     features = []
     # Iterate through the list of images
-    for file in imgs:
+    for img in imgs:
         # Read in each one by one
-        image = mpimg.imread(file)
+        image = np.copy(img)
         # apply color conversion if other than 'RGB'
         if cspace != 'RGB':
             if cspace == 'HSV':
@@ -324,7 +324,7 @@ def process_image(img):
 	heatmaps.append(np.copy(heat))
 	
 	# Define threshold value
-	threshold_filter = 18
+	threshold_filter = 22
 	
 	# Apply threshold to help remove false positives
 	combined = sum(heatmaps)
