@@ -190,7 +190,14 @@ def find_cars(img, ystart, ystop, scale, cspace, hog_channel, svc, X_scaler, ori
 				test_features = X_scaler.transform(np.hstack((shape_feat, hist_feat)).reshape(1, -1))    
 				test_prediction = svc.predict(test_features)
 			
-			test_prediction = svc.predict(hog_features.reshape(1, -1))
+			# test_prediction = svc.predict(hog_features.reshape(1, -1))
+			# Use confidence score to determine the window should be included or not
+			confidence_score = svc.decision_function(hog_features.reshape(1, -1))
+			if confidence_score >= 0.5:			
+				#test_features = X_scaler.transform(np.hstack((shape_feat, hist_feat)).reshape(1, -1))    
+				test_prediction = 1
+			else:
+				test_prediction = 0
 			
 			if test_prediction == 1 or show_all_windows:
 				xbox_left = np.int(xleft*scale)
@@ -281,7 +288,7 @@ def process_test_image(img):
 	heat = add_heat(heat_original,windows_flatten)
 	
 	# Apply threshold to help remove false positives
-	heat_filtered = apply_threshold(np.copy(heat), 3)
+	heat_filtered = apply_threshold(np.copy(heat), 1)
 	
 	# Visualize the heatmap when displaying    
 	heatmap = np.clip(heat_filtered, 0, 255)
@@ -324,7 +331,7 @@ def process_image(img):
 	heatmaps.append(np.copy(heat))
 	
 	# Define threshold value
-	threshold_filter = 22
+	threshold_filter = 6
 	
 	# Apply threshold to help remove false positives
 	combined = sum(heatmaps)
